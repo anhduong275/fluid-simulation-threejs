@@ -13,8 +13,13 @@ body
 
 .webgl
 {
-    position: fixed;
+    /* position: fixed;
     top: 0;
-    left: 0;
+    left: 0; */
+    /* center the rendering canvas */
+    display: flex;
+    justify-content: center;
+    margin: auto;
+    /* center the rendering canvas */
     outline: none;
 }

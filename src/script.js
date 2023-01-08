@@ -4,12 +4,15 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "dat.gui";
 import fullscreenquadVert from "./shaders/fullscreenquad.vert";
 import fullscreenquadFrag from "./shaders/fullscreenquad.frag";
+import Settings from "./settings.js";
+import Common from "./common";
+import Diffuse from "./diffuse";
 
 // Debug
 const gui = new dat.GUI();
 
 // Canvas
-const canvas = document.querySelector("canvas.webgl");
+// const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
@@ -38,33 +41,41 @@ scene.add(pointLight);
 /**
  * Sizes
  */
+let tempWidth = window.innerWidth;
+let tempHeight = window.innerHeight;
+const sideLength = tempWidth <= tempHeight ? tempWidth : tempHeight;
 const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: sideLength,
+  height: sideLength,
 };
+
+/**
+ * Renderer
+ */
+// const renderer = new THREE.WebGLRenderer({
+//   canvas: canvas,
+// });
+// renderer.setSize(sizes.width, sizes.height);
+// renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+Common.updateRenderer(sizes);
 
 window.addEventListener("resize", () => {
   // Update sizes
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
+  sizes.width = sideLength;
+  sizes.height = sideLength;
 
   // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
   // Update renderer
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
+  Common.updateRenderer(sizes);
+  // Common.renderer.setSize(sizes.width, sizes.height);
+  // Common.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
+  // Update settings
+  Settings.resize(sideLength);
 });
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 /**
  * FBO
@@ -73,6 +84,22 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
   ? THREE.HalfFloatType
   : THREE.FloatType;
+const fboIds = {
+  s: 0,
+  density: 0,
+
+  v_x: 0,
+  v_y: 0,
+
+  v_x0: 0,
+  v_y0: 0,
+};
+for (let key in fboIds) {
+  fboIds[key] = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
+    type: type,
+  });
+}
+
 let testFbo = new THREE.WebGLRenderTarget(
   // testFbo.x,
   sizes.width,
@@ -130,6 +157,17 @@ cameraFolder.open();
 
 const clock = new THREE.Clock();
 
+/**
+ * Initializing action objects
+ */
+const diffuseX = new Diffuse(1, v_x0, v_x, Settings.visc, 4);
+const diffuseY = new Diffuse(2, v_y0, v_y, Settings.visc, 4);
+
+const step = () => {
+  diffuseX.render();
+  diffuseY.render();
+};
+
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
@@ -140,11 +178,11 @@ const tick = () => {
   // controls.update()
 
   // Render
-  renderer.setRenderTarget(testFbo);
-  renderer.render(scene, camera);
-  renderer.setRenderTarget(null);
+  Common.renderer.setRenderTarget(testFbo);
+  Common.renderer.render(scene, camera);
+  Common.renderer.setRenderTarget(null);
 
-  renderer.render(fsquadScene, camera);
+  Common.renderer.render(fsquadScene, camera);
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
