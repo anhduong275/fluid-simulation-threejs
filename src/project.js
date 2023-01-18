@@ -2,6 +2,7 @@ import { Camera, ShaderMaterial, Scene, PlaneGeometry, Mesh } from "three";
 import pressureFrag from "./shaders/pressure.frag";
 import divergenceFrag from "./shaders/divergence.frag";
 import projectFrag from "./shaders/project.frag";
+import settingPressureFrag from "./shaders/settingPressure.frag";
 import fullscreenVert from "./shaders/fullscreenquad.vert";
 import Settings from "./settings";
 import Common from "./common";
@@ -75,16 +76,26 @@ class Project {
     this.divergenceQuad = new Mesh(this.geometry, this.divergenceMaterial);
     this.divergenceScene.add(this.divergenceQuad);
 
+    // creating setting pressure scene // set pressure to 0
+    this.settingPressureScene = new Scene();
+    this.settingPressureMaterial = new ShaderMaterial({
+      vertexShader: fullscreenVert,
+      fragmentShader: settingPressureFrag,
+
+      depthWrite: false,
+      depthTest: false,
+    });
+
     // creating project scene
     this.projectScene = new Scene();
     this.projectMaterial = new ShaderMaterial({
-      // uniforms: {
-      p: { value: this.p.texture },
-      veloc: { value: this.veloc.texture },
-      cellScale: { value: Settings.cellScale },
-      N: { value: Settings.sideLength },
-      setBound: { value: this.setBound },
-      // },
+      uniforms: {
+        p: { value: this.p.texture },
+        veloc: { value: this.veloc.texture },
+        cellScale: { value: Settings.cellScale },
+        N: { value: Settings.sideLength },
+        setBound: { value: this.setBound },
+      },
       vertexShader: fullscreenVert,
       fragmentShader: projectFrag,
 
@@ -96,6 +107,11 @@ class Project {
   }
 
   render() {
+    // set p to 0
+    Common.renderer.setRenderTarget(this.p);
+    Common.renderer.render(this.settingPressureScene, this.camera);
+    Common.renderer.setRenderTarget(null);
+
     this.setBound = 0;
     this.setCorners = 0;
 
