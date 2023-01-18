@@ -1,5 +1,5 @@
 import { Camera, Mesh, PlaneGeometry, Scene, ShaderMaterial } from "three";
-import diffuseVert from "./shaders/diffuse.vert";
+import fullscreenVert from "./shaders/fullscreenquad.vert";
 import diffuseFrag from "./shaders/diffuse.frag";
 import Settings from "./settings";
 import Common from "./common";
@@ -54,23 +54,24 @@ class Diffuse {
         x0Texture: { value: this.x0.texture },
         a: { value: a },
         c: { value: c },
-        N: { value: this.sideLength },
         cellScale: { value: Settings.cellScale },
         setBound: { value: this.setBound },
         boundaryIndex: { value: this.boundaryIndex },
       },
-      vertexShader: diffuseVert,
+      vertexShader: fullscreenVert,
       fragmentShader: diffuseFrag,
 
       depthWrite: false,
       depthTest: false,
     });
     this.geometry = new PlaneGeometry(2, 2);
-    this.diffuseQuad = new Mesh(geometry, material);
+    this.diffuseQuad = new Mesh(this.geometry, this.material);
     this.diffuseScene.add(this.diffuseQuad);
   }
 
   render() {
+    this.setBound = 0;
+
     // let fbo_0 = x;
     // let fbo_1 = x0;
     // let temp_fbo;
@@ -91,7 +92,7 @@ class Diffuse {
 
       // In Mike Ash's version, he didn't switch
       // might need to look further. Mike might have missed some steps
-      Common.renderer.setRenderTarget(x);
+      Common.renderer.setRenderTarget(this.x);
       Common.renderer.render(this.diffuseScene, this.camera);
       Common.renderer.setRenderTarget(null);
 

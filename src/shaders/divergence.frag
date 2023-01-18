@@ -1,11 +1,9 @@
 varying vec2 vUv;
-uniform sampler2D xTexture;
-uniform sampler2D x0Texture;
-uniform float a;
-uniform float c;
+uniform sampler2D veloc;
 uniform float cellScale;
-uniform bool setBound;
-uniform int boundaryIndex;
+uniform int N;
+uniform sampler2D div;
+uniform int setCorners;
 
 float f1 = 1 - cellScale;
 float f2 = 1 - 2 * cellScale;
@@ -29,7 +27,7 @@ void set_bnd(int b, sampler2D texture) {
   }
 
   if (vUv.y == 0 || vUv.y == f1 || vUv.x == 0 || vUv.x == f1) {
-    gl_FragColor = vec4(boundaryVal, 0.0, 0.0, 0.0);
+    gl_FragColor = vec4(boundaryVal, 0.0, 0.0, 1.0);
   } else {
     // if not a boundary cell, keep it the way it is!
     gl_FragColor = texture2D(texture, vUv);
@@ -72,26 +70,26 @@ void set_corners(sampler2D texture) {
   }
 }
 
-// COPIED FROM FULLSCREENQUAD.FRAG
 void main() {
-    // DEFINE SET_BND HERE
-    // gl_FragColor = vec4(vUv, 0.0, 1.0);
-
-    float cRecip = 1.0 / c;
-    float calcX;
-    if (setBound == 0) {
-      calcX = (texture2D(x0Texture, vUv.xy).x 
-            + a * (
-                texture2D(xTexture, vec2(vUv.x + cellScale, vUv.y)).x 
-                + texture2D(xTexture, vec2(vUv.x - cellScale, vUv.y)).x
-                + texture2D(xTexture, vec2(vUv.x, vUv.y + cellScale)).x
-                + texture2D(xTexture, vec2(vUv.x, vUv.y - cellScale)).x
-                )) * cRecip;
-      gl_FragColor = vec4(calcX, 0.0, 0.0, 0.0);
-    }
-    else if (setBound == 1) {
-      set_bnd(boundaryIndex, xTexture);
-    } else if (setBound == 2) {
-      set_corners(xTexture);
+    if (setCorners == 0) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        if (vUv.x == 0 || vUv.y == 0 || vUv.x == 1 - cellScale || vUv.y == 1 - cellScale) {
+            // set bounds
+            set_bnd(0, div);
+        } else {
+            float x1 = vUv.x + cellScale;
+            float x2 = vUv.x - cellScale;
+            float y1 = vUv.y + cellScale;
+            float y2 = vUv.y - cellScale;
+            float calcColor = (-0.5 *
+                texture2D(veloc, vec2(x1, vUv.y)).x
+                - texture2D(veloc, vec2(x2, vUv.y)).x
+                + texture2D(veloc, vec2(vUv.x, y1)).y
+                - texture2D(veloc, vec2(vUv.x, y2)).y
+            ) / N;
+            gl_FragColor = vec4(calcColor, 0.0, 0.0, 1.0)
+        }
+    } else { // setCorners == 1
+        set_corners(div);
     }
 }
