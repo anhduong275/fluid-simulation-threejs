@@ -9,6 +9,7 @@ import Common from "./common";
 import Diffuse from "./diffuse";
 import AddStuff from "./addStuff";
 import { Vector2 } from "three";
+import mouse from "./mouse";
 
 // Debug
 const gui = new dat.GUI();
@@ -156,41 +157,10 @@ const clock = new THREE.Clock();
 const addStuff = new AddStuff(fboIds.density, fboIds.tempDensity, fboIds.veloc);
 // is veloc0 even used?
 
-addEventListener("mousedown", (event) => {
-  let tempWidth = window.innerWidth;
-  let tempHeight = window.innerHeight;
-  const extraLength =
-    tempWidth <= tempHeight ? tempHeight - tempWidth : tempWidth - tempHeight;
-  let mousePosX =
-    tempWidth <= tempHeight
-      ? event.pageX * Settings.cellScale * 2 - 1
-      : (event.pageX - extraLength) * Settings.cellScale * 2 - 1;
-  if (mousePosX < Settings.sideLength + extraLength / 2) {
-    mousePosX =
-      tempWidth <= tempHeight
-        ? event.pageX * Settings.cellScale * 2 - 1
-        : (event.pageX - extraLength / 2) * Settings.cellScale * 2 - 1;
-  }
-  let mousePosY =
-    tempWidth <= tempHeight
-      ? (event.pageY - extraLength) * Settings.cellScale * 2 - 1
-      : event.pageY * Settings.cellScale * 2 - 1;
-  if (mousePosY < Settings.sideLength + extraLength / 2) {
-    mousePosY =
-      tempWidth <= tempHeight
-        ? (event.pageY - extraLength / 2) * Settings.cellScale * 2 - 1
-        : event.pageY * Settings.cellScale * 2 - 1;
-  }
-  // flip y
-  mousePosY = -mousePosY;
-
-  // convert to range(0,1)
-  mousePosX = (mousePosX + 1) / 2;
-  mousePosY = (mousePosY + 1) / 2;
-
-  const mousePos = new Vector2(mousePosX, mousePosY);
-  addStuff.addDye(0.2, mousePos);
-});
+/**
+ * Mouse Controls
+ */
+mouse.init();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
@@ -207,6 +177,11 @@ const tick = () => {
   // Common.renderer.setRenderTarget(null);
 
   // Common.renderer.render(fsquadScene, camera);
+
+  // adding user interactivity
+  if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
+    addStuff.addDye(0.2, mouse.mousePos);
+  }
 
   // render density
   addStuff.renderDye();
