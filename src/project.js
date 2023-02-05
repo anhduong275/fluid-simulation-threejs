@@ -85,6 +85,11 @@ class Project {
       depthWrite: false,
       depthTest: false,
     });
+    this.settingPressureQuad = new Mesh(
+      this.geometry,
+      this.settingPressureMaterial
+    );
+    this.settingPressureScene.add(this.settingPressureQuad);
 
     // creating project scene
     this.projectScene = new Scene();

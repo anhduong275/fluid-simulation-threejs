@@ -7,12 +7,11 @@ import fullscreenquadFrag from "./shaders/fullscreenquad.frag";
 import Settings from "./settings.js";
 import Common from "./common";
 import Diffuse from "./diffuse";
+import AddStuff from "./addStuff";
+import { Vector2 } from "three";
 
 // Debug
 const gui = new dat.GUI();
-
-// Canvas
-// const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
@@ -52,11 +51,6 @@ const sizes = {
 /**
  * Renderer
  */
-// const renderer = new THREE.WebGLRenderer({
-//   canvas: canvas,
-// });
-// renderer.setSize(sizes.width, sizes.height);
-// renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 Common.updateRenderer(sizes);
 
 window.addEventListener("resize", () => {
@@ -70,8 +64,6 @@ window.addEventListener("resize", () => {
 
   // Update renderer
   Common.updateRenderer(sizes);
-  // Common.renderer.setSize(sizes.width, sizes.height);
-  // Common.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   // Update settings
   Settings.resize(sideLength);
@@ -87,12 +79,10 @@ const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
 const fboIds = {
   s: 0,
   density: 0,
+  tempDensity: 0,
 
-  v_x: 0,
-  v_y: 0,
-
-  v_x0: 0,
-  v_y0: 0,
+  veloc: 0,
+  veloc0: 0,
 };
 for (let key in fboIds) {
   fboIds[key] = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
@@ -100,15 +90,9 @@ for (let key in fboIds) {
   });
 }
 
-let testFbo = new THREE.WebGLRenderTarget(
-  // testFbo.x,
-  sizes.width,
-  // testFbo.y,
-  sizes.height,
-  {
-    type: type,
-  }
-);
+let testFbo = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
+  type: type,
+});
 
 // Fullscreen Quad
 var quad = new THREE.Mesh(
@@ -160,13 +144,53 @@ const clock = new THREE.Clock();
 /**
  * Initializing action objects
  */
-const diffuseX = new Diffuse(1, v_x0, v_x, Settings.visc, 4);
-const diffuseY = new Diffuse(2, v_y0, v_y, Settings.visc, 4);
+// const diffuseX = new Diffuse(1, fboIds.v_x0, fboIds.v_x, Settings.visc, 4);
+// const diffuseY = new Diffuse(2, fboIds.v_y0, fboIds.v_y, Settings.visc, 4);
 
-const step = () => {
-  diffuseX.render();
-  diffuseY.render();
-};
+// const step = () => {
+//   diffuseX.render();
+//   diffuseY.render();
+// };
+
+// addStuff
+const addStuff = new AddStuff(fboIds.density, fboIds.tempDensity, fboIds.veloc);
+// is veloc0 even used?
+
+addEventListener("mousedown", (event) => {
+  let tempWidth = window.innerWidth;
+  let tempHeight = window.innerHeight;
+  const extraLength =
+    tempWidth <= tempHeight ? tempHeight - tempWidth : tempWidth - tempHeight;
+  let mousePosX =
+    tempWidth <= tempHeight
+      ? event.pageX * Settings.cellScale * 2 - 1
+      : (event.pageX - extraLength) * Settings.cellScale * 2 - 1;
+  if (mousePosX < Settings.sideLength + extraLength / 2) {
+    mousePosX =
+      tempWidth <= tempHeight
+        ? event.pageX * Settings.cellScale * 2 - 1
+        : (event.pageX - extraLength / 2) * Settings.cellScale * 2 - 1;
+  }
+  let mousePosY =
+    tempWidth <= tempHeight
+      ? (event.pageY - extraLength) * Settings.cellScale * 2 - 1
+      : event.pageY * Settings.cellScale * 2 - 1;
+  if (mousePosY < Settings.sideLength + extraLength / 2) {
+    mousePosY =
+      tempWidth <= tempHeight
+        ? (event.pageY - extraLength / 2) * Settings.cellScale * 2 - 1
+        : event.pageY * Settings.cellScale * 2 - 1;
+  }
+  // flip y
+  mousePosY = -mousePosY;
+
+  // convert to range(0,1)
+  mousePosX = (mousePosX + 1) / 2;
+  mousePosY = (mousePosY + 1) / 2;
+
+  const mousePos = new Vector2(mousePosX, mousePosY);
+  addStuff.addDye(0.2, mousePos);
+});
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
@@ -178,11 +202,14 @@ const tick = () => {
   // controls.update()
 
   // Render
-  Common.renderer.setRenderTarget(testFbo);
-  Common.renderer.render(scene, camera);
-  Common.renderer.setRenderTarget(null);
+  // Common.renderer.setRenderTarget(testFbo);
+  // Common.renderer.render(scene, camera);
+  // Common.renderer.setRenderTarget(null);
 
-  Common.renderer.render(fsquadScene, camera);
+  // Common.renderer.render(fsquadScene, camera);
+
+  // render density
+  addStuff.renderDye();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
