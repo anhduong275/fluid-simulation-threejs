@@ -7,7 +7,6 @@ uniform vec2 vUvAdded;
 uniform float pixelSize;
 
 bool compare(float fragUv, float mouseInput) {
-    // return round(mouseInput * 100.0) == round(fragUv * 100.0);
     return fragUv >= mouseInput - pixelSize / 2.0 && fragUv <= mouseInput + pixelSize / 2.0;
 }
 

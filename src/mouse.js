@@ -66,10 +66,8 @@ class Mouse {
       if (tempMousePos.x == -1 && tempMousePos.y == -1) {
         this.prevMousePos = this.mousePos;
       } else {
-        this.prevMousePos = this.tempMousePos;
+        this.prevMousePos = tempMousePos;
       }
-
-      console.log("mouse x ", this.mousePos.x, ", mouse y ", this.mousePos.y);
       return this.mousePos;
     } else {
       return new Vector2(-1, -1);

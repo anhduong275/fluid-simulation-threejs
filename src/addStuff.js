@@ -50,11 +50,6 @@ class AddStuff {
     this.addDyeQuad = new Mesh(this.geometry, this.addDyeMaterial);
     this.addDyeScene.add(this.addDyeQuad);
 
-    // render temp density 1st time
-    Common.renderer.setRenderTarget(this.densityFbo);
-    Common.renderer.render(this.addDyeScene, this.camera);
-    Common.renderer.setRenderTarget(null);
-
     // create add velocity scene
     this.addVelScene = new Scene();
     this.addVelMaterial = new ShaderMaterial({
@@ -62,7 +57,7 @@ class AddStuff {
         velocity: { value: this.tempVelocityFbo.texture },
         velocAdded: { value: new Vector2(0.0, 0.0) },
         vUvAdded: { value: new Vector2(2.0, 2.0) },
-        init: { value: true },
+        pixelSize: { value: Settings.pixelSize },
       },
       vertexShader: fullscreenVert,
       fragmentShader: addVelFrag,
@@ -80,7 +75,6 @@ class AddStuff {
    * @param {*} vUvAdded the place where dye is added
    */
   addDye(amount, vUvAdded) {
-    console.log("pixel size = ", Settings.pixelSize);
     this.addDyeQuad.material.uniforms.density.value = this.densityFbo.texture;
     this.addDyeQuad.material.uniforms.amount.value = amount;
     this.addDyeQuad.material.uniforms.vUvAdded.value = vUvAdded;
@@ -107,7 +101,6 @@ class AddStuff {
     this.addVelQuad.material.uniforms.velocity.value = this.velocityFbo.texture;
     this.addVelQuad.material.uniforms.velocAdded.value = velocAdded;
     this.addVelQuad.material.uniforms.vUvAdded.value = vUvAdded;
-    this.addDyeQuad.material.uniforms.init.value = false;
     Common.renderer.setRenderTarget(this.tempVelocityFbo);
     Common.renderer.render(this.addVelScene, this.camera);
     Common.renderer.setRenderTarget(null);
