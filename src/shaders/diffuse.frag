@@ -7,6 +7,8 @@ uniform float cellScale;
 uniform bool setBound;
 uniform int boundaryIndex;
 
+uniform bool init; // to init velocity v
+
 float f1 = 1 - cellScale;
 float f2 = 1 - 2 * cellScale;
 
@@ -76,6 +78,9 @@ void set_corners(sampler2D texture) {
 void main() {
     // DEFINE SET_BND HERE
     // gl_FragColor = vec4(vUv, 0.0, 1.0);
+    if (init == 0) {
+      gl_FragColor = vec4(0.0);
+    }
 
     float cRecip = 1.0 / c;
     float calcX;

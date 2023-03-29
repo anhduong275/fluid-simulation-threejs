@@ -23,8 +23,8 @@ class Diffuse {
   /**
    *
    * @param {*} boundaryIndex int
-   * @param {*} x v_x0 | v_y0
-   * @param {*} x0 v_x | v_y
+   * @param {*} x v_x0 | v_y0, the fbo
+   * @param {*} x0 v_x | v_y, the fbo
    * @param {*} diff float
    * @param {*} iter int number of iterations
    */
@@ -67,6 +67,10 @@ class Diffuse {
     this.geometry = new PlaneGeometry(2, 2);
     this.diffuseQuad = new Mesh(this.geometry, this.material);
     this.diffuseScene.add(this.diffuseQuad);
+
+    // init render
+    Common.renderer.setRenderTarget(this.x);
+    Common.renderer.render(this.diffuseScene, this.camera);
   }
 
   render() {

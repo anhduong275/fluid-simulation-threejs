@@ -84,6 +84,7 @@ const fboIds = {
 
   veloc: 0,
   veloc0: 0,
+  tempVeloc: 0,
 };
 for (let key in fboIds) {
   fboIds[key] = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
@@ -154,7 +155,12 @@ const clock = new THREE.Clock();
 // };
 
 // addStuff
-const addStuff = new AddStuff(fboIds.density, fboIds.tempDensity, fboIds.veloc);
+const addStuff = new AddStuff(
+  fboIds.density,
+  fboIds.tempDensity,
+  fboIds.veloc,
+  fboIds.tempVeloc
+);
 // is veloc0 even used?
 
 /**
@@ -179,8 +185,24 @@ const tick = () => {
   // Common.renderer.render(fsquadScene, camera);
 
   // adding user interactivity
+  // console.log("tick");
+  // console.log(mouse.isMouseDown);
+  // console.log(mouse.mousePos.x);
+  // console.log(mouse.mousePos.y);
   if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
-    addStuff.addDye(0.2, mouse.mousePos);
+    addStuff.addDye(0.4, mouse.mousePos);
+    // const veloc = new Vector2(
+    //   mouse.mousePos.x - mouse.prevMousePos.x,
+    //   mouse.mousePos.y - mouse.prevMousePos.y
+    // );
+    // console.log(
+    //   "prevMousePos x ",
+    //   mouse.prevMousePos.x,
+    //   ", prevMousePos.y ",
+    //   mouse.prevMousePos.y
+    // );
+    // console.log("veloc ", veloc);
+    // addStuff.addVelocity(veloc, mouse.mousePos);
   }
 
   // render density
