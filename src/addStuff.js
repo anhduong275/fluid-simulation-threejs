@@ -72,11 +72,6 @@ class AddStuff {
     });
     this.addVelQuad = new Mesh(this.geometry, this.addVelMaterial);
     this.addVelScene.add(this.addVelQuad);
-
-    // render vel density 1st time
-    Common.renderer.setRenderTarget(this.velocityFbo);
-    Common.renderer.render(this.addVelScene, this.camera);
-    Common.renderer.setRenderTarget(null);
   }
 
   /**
