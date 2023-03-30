@@ -10,3 +10,6 @@
 
 // HOW DO I ACCESS THE CANVAS DATA? MUST USE FBO! MAYBE NOT DO THESE COMMON UTILS FOR NOW?
 // My plan: to include FluidCubeAddDensity (addDye) and FluidCubeAddVelocity (addVelocity) in this file
+export const convertToNormalizeCoords = (a) => {
+  return a * 0.5 + 0.5;
+};

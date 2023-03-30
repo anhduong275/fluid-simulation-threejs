@@ -10,6 +10,7 @@ import Diffuse from "./diffuse";
 import AddStuff from "./addStuff";
 import { Vector2 } from "three";
 import mouse from "./mouse";
+import { convertToNormalizeCoords } from "./utils";
 
 // Debug
 const gui = new dat.GUI();
@@ -191,10 +192,6 @@ const tick = () => {
       mouse.mousePos.x - mouse.prevMousePos.x,
       mouse.mousePos.y - mouse.prevMousePos.y
     );
-    console.log("veloc x ", veloc.x, ", veloc.y ", veloc.y);
-    veloc.normalize();
-    console.log("veloc x ", veloc.x, ", veloc.y ", veloc.y);
-    console.log("veloc ", veloc);
     addStuff.addVelocity(veloc, mouse.mousePos);
   }
 
