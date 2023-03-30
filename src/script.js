@@ -11,6 +11,7 @@ import AddStuff from "./addStuff";
 import { Vector2 } from "three";
 import mouse from "./mouse";
 import { convertToNormalizeCoords } from "./utils";
+import Advect from "./advect";
 
 // Debug
 const gui = new dat.GUI();
@@ -84,7 +85,6 @@ const fboIds = {
   tempDensity: 0,
 
   veloc: 0,
-  veloc0: 0,
   tempVeloc: 0,
 };
 for (let key in fboIds) {
@@ -162,7 +162,9 @@ const addStuff = new AddStuff(
   fboIds.veloc,
   fboIds.tempVeloc
 );
-// is veloc0 even used?
+
+// advect
+const advect = new Advect(fboIds.veloc, fboIds.tempVeloc);
 
 /**
  * Mouse Controls
@@ -197,6 +199,8 @@ const tick = () => {
 
   // render density
   addStuff.renderDye();
+  // render advect
+  advect.render();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
