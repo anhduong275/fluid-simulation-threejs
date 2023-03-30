@@ -185,22 +185,15 @@ const tick = () => {
   // Common.renderer.render(fsquadScene, camera);
 
   // adding user interactivity
-  // console.log("tick");
-  // console.log(mouse.isMouseDown);
-  // console.log(mouse.mousePos.x);
-  // console.log(mouse.mousePos.y);
   if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
     addStuff.addDye(0.4, mouse.mousePos);
     const veloc = new Vector2(
       mouse.mousePos.x - mouse.prevMousePos.x,
       mouse.mousePos.y - mouse.prevMousePos.y
     );
-    console.log(
-      "prevMousePos x ",
-      mouse.prevMousePos.x,
-      ", prevMousePos.y ",
-      mouse.prevMousePos.y
-    );
+    console.log("veloc x ", veloc.x, ", veloc.y ", veloc.y);
+    veloc.normalize();
+    console.log("veloc x ", veloc.x, ", veloc.y ", veloc.y);
     console.log("veloc ", veloc);
     addStuff.addVelocity(veloc, mouse.mousePos);
   }
