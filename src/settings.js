@@ -10,6 +10,8 @@ class Settings {
     this.resolution = 4;
     this.cellScale = 1 / this.sideLength;
     this.pixelSize = this.cellScale * this.resolution;
+
+    this.diffuseIterations = 4;
   }
 
   resize(newSideLength) {

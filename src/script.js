@@ -86,6 +86,9 @@ const fboIds = {
 
   veloc: 0,
   tempVeloc: 0,
+
+  diffuseFbo1: 0,
+  diffuseFbo2: 0,
 };
 for (let key in fboIds) {
   fboIds[key] = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
@@ -166,6 +169,13 @@ const addStuff = new AddStuff(
 // advect
 const advect = new Advect(fboIds.veloc, fboIds.tempVeloc);
 
+// diffuse
+const diffuseVeloc = new Diffuse(
+  fboIds.veloc,
+  fboIds.diffuseFbo1,
+  fboIds.diffuseFbo2
+);
+
 /**
  * Mouse Controls
  */
@@ -200,7 +210,12 @@ const tick = () => {
   // render density
   addStuff.renderDye();
   // render advect
+  // NOTE: for now advect ONLY advects for VELOCITY! We have to create another
+  // version that can advects for the dye as well!
   advect.render();
+  // render diffuse
+  // NOTE: also NO DYE VERSION YET!
+  diffuseVeloc.render();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
