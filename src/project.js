@@ -2,7 +2,6 @@ import { Camera, ShaderMaterial, Scene, PlaneGeometry, Mesh } from "three";
 import pressureFrag from "./shaders/pressure.frag";
 import divergenceFrag from "./shaders/divergence.frag";
 import projectFrag from "./shaders/project.frag";
-import settingPressureFrag from "./shaders/settingPressure.frag";
 import fullscreenVert from "./shaders/fullscreenquad.vert";
 import Settings from "./settings";
 import Common from "./common";
@@ -13,21 +12,25 @@ When creating an instance of this class, create only 1 for both x & y directions
 class Project {
   /**
    *
-   * @param {*} veloc an FBO
-   * @param {*} p an FBO
-   * @param {*} div an FBO
-   * @param {*} iter int number of iterations
-   * @param {*} boundaryIndex int boundary index
+   * @param {*} velocFbo velocity FBO
+   * @param {*} tempVelocFbo temporary velocity FBO
+   * @param {*} divergenceFbo divergenceFbo FBO
+   * @param {*} pressureFbo1 pressure FBO 1
+   * @param {*} pressureFbo2 pressure FBO 2
    */
-  constructor(veloc, p, div, iter, boundaryIndex) {
-    this.veloc = veloc;
-    this.p = p;
-    this.div = div;
-    this.iter = iter;
-    this.boundaryIndex = boundaryIndex;
+  constructor(
+    velocFbo,
+    tempVelocFbo,
+    divergenceFbo,
+    pressureFbo1,
+    pressureFbo2
+  ) {
+    this.velocFbo = velocFbo;
+    this.tempVelocFbo = tempVelocFbo;
+    this.divergenceFbo = divergenceFbo;
 
-    this.setCorners = 0;
-    this.setBound = 0;
+    this.pressureFbo1 = pressureFbo1;
+    this.pressureFbo2 = pressureFbo2;
 
     this.init();
   }
@@ -42,13 +45,10 @@ class Project {
 
     this.pressureMaterial = new ShaderMaterial({
       uniforms: {
-        xTexture: { value: this.p.texture },
-        x0Texture: { value: this.div.texture },
-        a: { value: 1 },
-        c: { value: 6 },
-        cellScale: { value: Settings.cellScale },
-        setBound: { value: this.setBound },
-        boundaryIndex: { value: this.boundaryIndex },
+        pixelSize: { value: Settings.pixelSize },
+        pressure: { value: this.pressureFbo1.texture },
+        dt: { value: Settings.dt },
+        divergence: { value: this.divergenceFbo.texture },
       },
       vertexShader: fullscreenVert,
       fragmentShader: pressureFrag,
@@ -58,11 +58,8 @@ class Project {
     });
     this.divergenceMaterial = new ShaderMaterial({
       uniforms: {
-        veloc: { value: this.veloc.texture },
-        cellScale: { value: Settings.cellScale },
-        N: { value: Settings.sideLength },
-        div: { value: this.div.texture },
-        setCorners: { value: this.setCorners },
+        velocity: { value: this.velocFbo.texture },
+        pixelSize: { value: Settings.pixelSize },
       },
       vertexShader: fullscreenVert,
       fragmentShader: divergenceFrag,
@@ -76,30 +73,14 @@ class Project {
     this.divergenceQuad = new Mesh(this.geometry, this.divergenceMaterial);
     this.divergenceScene.add(this.divergenceQuad);
 
-    // creating setting pressure scene // set pressure to 0
-    this.settingPressureScene = new Scene();
-    this.settingPressureMaterial = new ShaderMaterial({
-      vertexShader: fullscreenVert,
-      fragmentShader: settingPressureFrag,
-
-      depthWrite: false,
-      depthTest: false,
-    });
-    this.settingPressureQuad = new Mesh(
-      this.geometry,
-      this.settingPressureMaterial
-    );
-    this.settingPressureScene.add(this.settingPressureQuad);
-
     // creating project scene
     this.projectScene = new Scene();
     this.projectMaterial = new ShaderMaterial({
       uniforms: {
-        p: { value: this.p.texture },
-        veloc: { value: this.veloc.texture },
-        cellScale: { value: Settings.cellScale },
-        N: { value: Settings.sideLength },
-        setBound: { value: this.setBound },
+        velocity: { value: this.velocFbo.texture },
+        pressure: { value: this.pressureFbo2.texture },
+        dt: { value: Settings.dt },
+        pixelSize: { value: Settings.pixelSize },
       },
       vertexShader: fullscreenVert,
       fragmentShader: projectFrag,
@@ -111,50 +92,54 @@ class Project {
     this.projectScene.add(this.projectQuad);
   }
 
-  render() {
-    // set p to 0
-    Common.renderer.setRenderTarget(this.p);
-    Common.renderer.render(this.settingPressureScene, this.camera);
+  renderDivergence() {
+    Common.renderer.setRenderTarget(this.divergenceFbo);
+    Common.renderer.render(this.divergenceScene, this.camera);
     Common.renderer.setRenderTarget(null);
+  }
 
-    this.setBound = 0;
-    this.setCorners = 0;
-
-    // rendering div
-    for (let i = 0; i < this.iter * 2; i++) {
-      Common.renderer.setRenderTarget(this.div);
-      Common.renderer.render(this.divergenceScene, this.camera);
-      Common.renderer.setRenderTarget(null);
-
-      this.setCorners++;
-      this.setCorners = this.setCorners % 2;
-      this.divergenceQuad.material.uniforms.setCorners.value = this.setCorners;
-    }
-
-    // rendering p
-    for (let i = 0; i < this.iter * 3; i++) {
-      Common.renderer.setRenderTarget(this.p);
+  renderPressure() {
+    let temp;
+    // render pressure using Jacobi iterative method
+    // start with pressureFbo1
+    for (let i = 0; i < Settings.projectIterations; i++) {
+      // render onto pressureFbo2
+      Common.renderer.setRenderTarget(this.pressureFbo2);
+      // this currently hold pressureFbo1
       Common.renderer.render(this.pressureScene, this.camera);
       Common.renderer.setRenderTarget(null);
 
-      this.setBound++;
-      this.setBound = this.setBound % 3;
-      this.pressureQuad.material.uniforms.setBound.value = this.setBound;
+      // switch between pressureFbo1 & pressureFbo2
+      temp = this.pressureFbo2; // temp is now newly rendered
+      this.pressureFbo2 = this.pressureFbo1; // pressureFbo2 is now not rendered
+      this.pressureFbo1 = temp; // pressureFbo1 is now newly rendered
     }
 
-    this.setBound = 0;
-    this.setCorners = 0;
+    // now, pressureFbo2 is always going to be the final result
+  }
 
-    // rendering project
-    for (let i = 0; i < this.iter * 3; i++) {
-      Common.renderer.setRenderTarget(this.veloc);
-      Common.renderer.render(this.projectScene, this.camera);
-      Common.renderer.setRenderTarget(null);
+  renderProject() {
+    // calculate final velocity
+    Common.renderer.setRenderTarget(this.tempVelocFbo);
+    // this scene's velocity uniform currently holds the OG velocity FBO (velocFbo)
+    Common.renderer.render(this.projectScene, this.camera);
+    Common.renderer.setRenderTarget(null);
 
-      this.setBound++;
-      this.setBound = this.setBound % 3;
-      this.projectQuad.material.uniforms.setBound.value = this.setBound;
-    }
+    // switch tempVelocFbo with velocFbo -- DO WE REALLY SWITCH OR JUST ASSIGNING THIS IS ENOUGH?
+    // let temp = this.tempVelocFbo;
+    this.velocFbo = this.tempVelocFbo;
+  }
+
+  render() {
+    // render divergence to divergenceFbo
+    this.renderDivergence();
+
+    // render pressure
+    this.renderPressure();
+
+    // render project
+    // final velocity should be velocFbo
+    this.renderProject();
   }
 }
 

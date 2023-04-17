@@ -9,7 +9,6 @@ class Diffuse {
    *
    * @param {*} boundaryIndex int
    * @param {*} velocFbo the velocity FBO
-   * @param {*} tempVelocFbo the temporary velocity FBO
    */
   constructor(velocFbo, diffuseFbo1, diffuseFbo2) {
     this.velocFbo = velocFbo;
@@ -61,7 +60,7 @@ class Diffuse {
       this.rendertarget = temp; // rendertarget is now dif1
     }
 
-    this.velocity = this.rendertarget;
+    this.velocFbo = this.rendertarget;
   }
 }
 

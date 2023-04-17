@@ -12,6 +12,7 @@ import { Vector2 } from "three";
 import mouse from "./mouse";
 import { convertToNormalizeCoords } from "./utils";
 import Advect from "./advect";
+import Project from "./project";
 
 // Debug
 const gui = new dat.GUI();
@@ -89,6 +90,10 @@ const fboIds = {
 
   diffuseFbo1: 0,
   diffuseFbo2: 0,
+
+  divergence: 0,
+  pressureFbo1: 0,
+  pressureFbo2: 0,
 };
 for (let key in fboIds) {
   fboIds[key] = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
@@ -150,13 +155,6 @@ const clock = new THREE.Clock();
 /**
  * Initializing action objects
  */
-// const diffuseX = new Diffuse(1, fboIds.v_x0, fboIds.v_x, Settings.visc, 4);
-// const diffuseY = new Diffuse(2, fboIds.v_y0, fboIds.v_y, Settings.visc, 4);
-
-// const step = () => {
-//   diffuseX.render();
-//   diffuseY.render();
-// };
 
 // addStuff
 const addStuff = new AddStuff(
@@ -174,6 +172,15 @@ const diffuseVeloc = new Diffuse(
   fboIds.veloc,
   fboIds.diffuseFbo1,
   fboIds.diffuseFbo2
+);
+
+// project
+const project = new Project(
+  fboIds.veloc,
+  fboIds.tempVeloc,
+  fboIds.divergence,
+  fboIds.pressureFbo1,
+  fboIds.pressureFbo2
 );
 
 /**
@@ -216,6 +223,8 @@ const tick = () => {
   // render diffuse
   // NOTE: also NO DYE VERSION YET!
   diffuseVeloc.render();
+  // render project
+  project.render();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
