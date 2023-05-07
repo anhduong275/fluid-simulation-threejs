@@ -3,6 +3,7 @@ import pressureFrag from "./shaders/pressure.frag";
 import divergenceFrag from "./shaders/divergence.frag";
 import projectFrag from "./shaders/project.frag";
 import fullscreenVert from "./shaders/fullscreenquad.vert";
+import fullscreenFrag from "./shaders/fullscreenquad.frag";
 import Settings from "./settings";
 import Common from "./common";
 
@@ -90,9 +91,28 @@ class Project {
     });
     this.projectQuad = new Mesh(this.geometry, this.projectMaterial);
     this.projectScene.add(this.projectQuad);
+
+    // creating render scene
+    this.renderScene = new Scene();
+    this.renderMaterial = new ShaderMaterial({
+      uniforms: {
+        fboTexture: { value: this.velocFbo.texture },
+        pixelSize: { value: Settings.pixelSize },
+      },
+      vertexShader: fullscreenVert,
+      fragmentShader: fullscreenFrag,
+
+      depthWrite: false,
+      depthTest: false,
+    });
+    this.renderQuad = new Mesh(this.geometry, this.renderMaterial);
+    this.renderScene.add(this.renderQuad);
   }
 
   renderDivergence() {
+    this.divergenceQuad.material.uniforms.velocity.value =
+      this.velocFbo.texture;
+
     Common.renderer.setRenderTarget(this.divergenceFbo);
     Common.renderer.render(this.divergenceScene, this.camera);
     Common.renderer.setRenderTarget(null);
@@ -119,6 +139,8 @@ class Project {
   }
 
   renderProject() {
+    this.projectQuad.material.uniforms.velocity.value = this.velocFbo.texture;
+
     // calculate final velocity
     Common.renderer.setRenderTarget(this.tempVelocFbo);
     // this scene's velocity uniform currently holds the OG velocity FBO (velocFbo)
@@ -126,8 +148,9 @@ class Project {
     Common.renderer.setRenderTarget(null);
 
     // switch tempVelocFbo with velocFbo -- DO WE REALLY SWITCH OR JUST ASSIGNING THIS IS ENOUGH?
-    // let temp = this.tempVelocFbo;
+    let temp = this.velocFbo;
     this.velocFbo = this.tempVelocFbo;
+    this.tempVelocFbo = temp;
   }
 
   render() {
@@ -140,6 +163,11 @@ class Project {
     // render project
     // final velocity should be velocFbo
     this.renderProject();
+  }
+
+  renderVelocity() {
+    this.renderQuad.material.uniforms.fboTexture.value = this.velocFbo.texture;
+    Common.renderer.render(this.renderScene, this.camera);
   }
 }
 

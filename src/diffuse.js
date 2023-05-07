@@ -1,6 +1,7 @@
 import { Camera, Mesh, PlaneGeometry, Scene, ShaderMaterial } from "three";
 import fullscreenVert from "./shaders/fullscreenquad.vert";
 import diffuseFrag from "./shaders/diffuse.frag";
+import fullscreenFrag from "./shaders/fullscreenquad.frag";
 import Settings from "./settings";
 import Common from "./common";
 
@@ -43,9 +44,26 @@ class Diffuse {
     this.geometry = new PlaneGeometry(2, 2);
     this.diffuseQuad = new Mesh(this.geometry, this.material);
     this.diffuseScene.add(this.diffuseQuad);
+
+    // creating render scene
+    this.renderScene = new Scene();
+    this.renderMaterial = new ShaderMaterial({
+      uniforms: {
+        fboTexture: { value: this.rendertarget.texture },
+        pixelSize: { value: Settings.pixelSize },
+      },
+      vertexShader: fullscreenVert,
+      fragmentShader: fullscreenFrag,
+
+      depthWrite: false,
+      depthTest: false,
+    });
+    this.renderQuad = new Mesh(this.geometry, this.renderMaterial);
+    this.renderScene.add(this.renderQuad);
   }
 
   render() {
+    this.diffuseQuad.material.uniforms.velocity.value = this.velocFbo.texture;
     // The linear solver we use is Jacobi iterative solver, following Mofu-dev
     let temp;
     for (let i = 0; i < Settings.diffuseIterations; i++) {
@@ -60,7 +78,11 @@ class Diffuse {
       this.rendertarget = temp; // rendertarget is now dif1
     }
 
-    this.velocFbo = this.rendertarget;
+    this.renderQuad.material.uniforms.fboTexture.value =
+      this.rendertarget.texture;
+    Common.renderer.setRenderTarget(this.velocFbo);
+    Common.renderer.render(this.renderScene, this.camera);
+    Common.renderer.setRenderTarget(null);
   }
 }
 

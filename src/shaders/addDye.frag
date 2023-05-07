@@ -11,12 +11,12 @@ bool compare(float fragUv, float mouseInput) {
 }
 
 void main() {
-    vec4 oldDensity;
-    oldDensity = texture2D(density, vUv);
+    vec4 oldDensity = texture2D(density, vUv);
     if (compare(vUv.x, vUvAdded.x) && compare(vUv.y, vUvAdded.y)) {
-        float newDensity = clamp(oldDensity.x + amount, 0.0, 1.0);
-        gl_FragColor = vec4(newDensity, 0.0, 0.0, 1.0);
+        // float newDensity = clamp(oldDensity.x + amount, 0.0, 1.0);
+        float newDensity = oldDensity.x + amount;
+        gl_FragColor = vec4(newDensity, newDensity, 1.0, 1.0);
     } else {
-        gl_FragColor = oldDensity;
+        gl_FragColor = vec4(oldDensity.x,oldDensity.x,1.0,1.0);
     }
 }

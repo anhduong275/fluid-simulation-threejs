@@ -90,6 +90,7 @@ class AddStuff {
   }
 
   renderDye() {
+    this.addDyeQuad.material.uniforms.amount.value = 0;
     Common.renderer.render(this.addDyeScene, this.camera);
   }
 

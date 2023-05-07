@@ -10,7 +10,6 @@ import Common from "./common";
 // to be better
 class Advect {
   constructor(velocFbo, tempVelocFbo) {
-    this.dt = Settings.dt;
     this.velocFbo = velocFbo;
     this.tempVelocFbo = tempVelocFbo;
 
