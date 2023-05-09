@@ -13,7 +13,6 @@ import mouse from "./mouse";
 import { convertToNormalizeCoords } from "./utils";
 import Advect from "./advect";
 import Project from "./project";
-import FBOHelper from "three.fbo-helper";
 
 // Debug
 const gui = new dat.GUI();
@@ -191,15 +190,6 @@ const project = new Project(
 );
 
 /**
- * FBOHelper
- */
-// let helper = new FBOHelper(Common.renderer);
-// helper.setSize(Settings.sideLength, Settings.sideLength);
-// helper.attach(fboIds.veloc, "Velocity FBO", function (d) {
-//   return `Color: (${d.r}, ${d.g}, ${d.b})`;
-// });
-
-/**
  * Mouse Controls
  */
 mouse.init();
@@ -207,6 +197,7 @@ mouse.init();
 let notFirstTick = 0;
 let lastOutputtedVelocFbo;
 let lastOutputtedTempVelocFbo;
+let dyeAdded = false;
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
@@ -224,19 +215,33 @@ const tick = () => {
 
   // Common.renderer.render(fsquadScene, camera);
 
-  // temp
-  // TODO: change addStuff's density to veloc
+  // render advect. Not sure why it has to be before addStuff, but it works.
   if (notFirstTick) {
-    addStuff.densityFbo = lastOutputtedVelocFbo;
-    addStuff.tempDensityFbo = lastOutputtedTempVelocFbo;
+    advect.velocFbo = lastOutputtedVelocFbo;
+    advect.tempVelocFbo = lastOutputtedTempVelocFbo;
   } else {
     console.log("tick num", notFirstTick);
-    console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
-    console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
+    console.log("advect.velocFbo", advect.velocFbo.texture.id);
+    console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
   }
+
+  // temp
+  // TODO: change addStuff's density to veloc
+  // if (notFirstTick) {
+  //   addStuff.densityFbo = lastOutputtedVelocFbo;
+  //   addStuff.tempDensityFbo = lastOutputtedTempVelocFbo;
+  // } else {
+  //   console.log("tick num", notFirstTick);
+  //   console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
+  //   console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
+  // }
 
   // adding user interactivity
   if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
+    // temp
+    addStuff.densityFbo = advect.velocFbo;
+    addStuff.tempDensityFbo = advect.tempVelocFbo;
+
     addStuff.addDye(0.4, mouse.mousePos);
     // const veloc = new Vector2(
     //   mouse.mousePos.x - mouse.prevMousePos.x,
@@ -246,69 +251,35 @@ const tick = () => {
     console.log("tick num", notFirstTick);
     console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
     console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
+
+    dyeAdded = true;
   }
 
-  // render density
-  // addStuff.renderDye();
+  // render diffuse & project
+  if (dyeAdded) {
+    diffuseVeloc.velocFbo = addStuff.densityFbo;
+    diffuseVeloc.render();
+    // render project
+    project.velocFbo = addStuff.densityFbo;
+    project.tempVelocFbo = addStuff.tempDensityFbo;
+    project.render();
 
-  // render advect
-  // NOTE: for now advect ONLY advects for VELOCITY! We have to create another
-  // version that can advects for the dye as well!
-  // advect.velocFbo = addStuff.velocityFbo;
-  // advect.tempVelocFbo = addStuff.tempVelocityFbo;
+    // reset dyeAdded to false
+    dyeAdded = false;
+  } else {
+    diffuseVeloc.velocFbo = advect.velocFbo;
+    diffuseVeloc.render();
+    // render project
+    project.velocFbo = advect.velocFbo;
+    project.tempVelocFbo = advect.tempVelocFbo;
+    project.render();
+  }
 
-  // temp
-  // if (!notFirstTick || mouse.isMouseDown) {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("advect.velocFbo", advect.velocFbo.texture.id);
-  //   console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
-  // }
-  // advect.velocFbo = addStuff.densityFbo;
-  // advect.tempVelocFbo = addStuff.tempDensityFbo;
-  // if (!notFirstTick || mouse.isMouseDown) {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("advect.velocFbo", advect.velocFbo.texture.id);
-  //   console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
-  // }
-  // advect.render();
-  // if (!notFirstTick || mouse.isMouseDown) {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("advect.velocFbo", advect.velocFbo.texture.id);
-  //   console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
-  // }
-
-  // render diffuse
-  // NOTE: also NO DYE VERSION YET!
-  // diffuseVeloc.velocFbo = advect.velocFbo;
-  diffuseVeloc.velocFbo = addStuff.densityFbo; // for diffuse only
-  diffuseVeloc.render();
-  // render project
-  project.velocFbo = diffuseVeloc.velocFbo;
-  // project.tempVelocFbo = advect.tempVelocFbo;
-  project.tempVelocFbo = addStuff.tempDensityFbo; // for diffuse + project only
-  project.render();
-
-  // temp
-  // if (!notFirstTick || mouse.isMouseDown) {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("project.velocFbo", project.velocFbo.texture.id);
-  //   console.log("project.tempVelocFbo", project.tempVelocFbo.texture.id);
-  // }
-  // project.velocFbo = advect.velocFbo;
-  // project.tempVelocFbo = advect.tempVelocFbo;
-  // project.velocFbo = diffuseVeloc.velocFbo; // for diffuse only
-  // project.tempVelocFbo = addStuff.tempDensityFbo; // for diffuse only
   project.renderVelocity();
-  // if (!notFirstTick || mouse.isMouseDown) {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("project.velocFbo", project.velocFbo.texture.id);
-  //   console.log("project.tempVelocFbo", project.tempVelocFbo.texture.id);
-  // }
+
   lastOutputtedVelocFbo = project.velocFbo;
   lastOutputtedTempVelocFbo = project.tempVelocFbo;
   notFirstTick += 1;
-
-  // helper.update();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
