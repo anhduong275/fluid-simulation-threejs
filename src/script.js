@@ -17,30 +17,6 @@ import Project from "./project";
 // Debug
 const gui = new dat.GUI();
 
-// Scene
-const scene = new THREE.Scene();
-const fsquadScene = new THREE.Scene();
-
-// Objects
-const geometry = new THREE.TorusGeometry(0.7, 0.2, 16, 100);
-
-// Materials
-
-const material = new THREE.MeshBasicMaterial();
-material.color = new THREE.Color(0xff0000);
-
-// Mesh
-const sphere = new THREE.Mesh(geometry, material);
-scene.add(sphere);
-
-// Lights
-
-const pointLight = new THREE.PointLight(0xffffff, 0.1);
-pointLight.position.x = 2;
-pointLight.position.y = 3;
-pointLight.position.z = 4;
-scene.add(pointLight);
-
 /**
  * Sizes
  */
@@ -101,24 +77,6 @@ for (let key in fboIds) {
   });
 }
 
-let testFbo = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
-  type: type,
-});
-
-// Fullscreen Quad
-var quad = new THREE.Mesh(
-  new THREE.PlaneGeometry(2, 2),
-  new THREE.ShaderMaterial({
-    uniforms: { fboTexture: { value: testFbo.texture } },
-    vertexShader: fullscreenquadVert,
-    fragmentShader: fullscreenquadFrag,
-
-    depthWrite: false,
-    depthTest: false,
-  })
-);
-fsquadScene.add(quad);
-
 /**
  * Camera
  */
@@ -132,8 +90,6 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 2;
-// scene.add(camera);
-// fsquadScene.add(camera);
 
 // Controls
 // const controls = new OrbitControls(camera, canvas)
@@ -200,29 +156,19 @@ let lastOutputtedTempVelocFbo;
 let dyeAdded = false;
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
-
-  // Update objects
-  sphere.rotation.y = 0.5 * elapsedTime;
-
   // Update Orbital Controls
   // controls.update()
 
   // Render
-  // Common.renderer.setRenderTarget(testFbo);
-  // Common.renderer.render(scene, camera);
-  // Common.renderer.setRenderTarget(null);
-
-  // Common.renderer.render(fsquadScene, camera);
 
   // render advect. Not sure why it has to be before addStuff, but it works.
   if (notFirstTick) {
     advect.velocFbo = lastOutputtedVelocFbo;
     advect.tempVelocFbo = lastOutputtedTempVelocFbo;
   } else {
-    console.log("tick num", notFirstTick);
-    console.log("advect.velocFbo", advect.velocFbo.texture.id);
-    console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
+    // console.log("tick num", notFirstTick);
+    // console.log("advect.velocFbo", advect.velocFbo.texture.id);
+    // console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
   }
 
   // temp
@@ -248,9 +194,9 @@ const tick = () => {
     //   mouse.mousePos.y - mouse.prevMousePos.y
     // );
     // addStuff.addVelocity(veloc, mouse.mousePos);
-    console.log("tick num", notFirstTick);
-    console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
-    console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
+    // console.log("tick num", notFirstTick);
+    // console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
+    // console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
 
     dyeAdded = true;
   }
@@ -274,12 +220,18 @@ const tick = () => {
     project.tempVelocFbo = advect.tempVelocFbo;
     project.render();
   }
+  // diffuseVeloc.velocFbo = addStuff.densityFbo;
+  // diffuseVeloc.render();
+  // // render project
+  // project.velocFbo = addStuff.densityFbo;
+  // project.tempVelocFbo = addStuff.tempDensityFbo;
+  // project.render();
 
   project.renderVelocity();
 
   lastOutputtedVelocFbo = project.velocFbo;
   lastOutputtedTempVelocFbo = project.tempVelocFbo;
-  notFirstTick += 1;
+  notFirstTick = 1;
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);

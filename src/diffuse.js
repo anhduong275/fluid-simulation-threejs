@@ -8,8 +8,9 @@ import Common from "./common";
 class Diffuse {
   /**
    *
-   * @param {*} boundaryIndex int
    * @param {*} velocFbo the velocity FBO
+   * @param {*} diffuseFbo1 diffuse FBO number 1
+   * @param {*} diffuseFbo2 diffuse FBO number 2
    */
   constructor(velocFbo, diffuseFbo1, diffuseFbo2) {
     this.velocFbo = velocFbo;
@@ -49,7 +50,7 @@ class Diffuse {
     this.renderScene = new Scene();
     this.renderMaterial = new ShaderMaterial({
       uniforms: {
-        fboTexture: { value: this.rendertarget.texture },
+        fboTexture: { value: this.new_velocity.texture },
         pixelSize: { value: Settings.pixelSize },
       },
       vertexShader: fullscreenVert,
@@ -67,6 +68,8 @@ class Diffuse {
     // The linear solver we use is Jacobi iterative solver, following Mofu-dev
     let temp;
     for (let i = 0; i < Settings.diffuseIterations; i++) {
+      this.diffuseQuad.material.uniforms.new_velocity.value =
+        this.new_velocity.texture;
       // render
       Common.renderer.setRenderTarget(this.rendertarget);
       Common.renderer.render(this.diffuseScene, this.camera);
@@ -79,7 +82,7 @@ class Diffuse {
     }
 
     this.renderQuad.material.uniforms.fboTexture.value =
-      this.rendertarget.texture;
+      this.new_velocity.texture;
     Common.renderer.setRenderTarget(this.velocFbo);
     Common.renderer.render(this.renderScene, this.camera);
     Common.renderer.setRenderTarget(null);

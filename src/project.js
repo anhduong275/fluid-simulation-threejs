@@ -53,9 +53,6 @@ class Project {
       },
       vertexShader: fullscreenVert,
       fragmentShader: pressureFrag,
-
-      depthWrite: false,
-      depthTest: false,
     });
     this.divergenceMaterial = new ShaderMaterial({
       uniforms: {
@@ -79,7 +76,7 @@ class Project {
     this.projectMaterial = new ShaderMaterial({
       uniforms: {
         velocity: { value: this.velocFbo.texture },
-        pressure: { value: this.pressureFbo2.texture },
+        pressure: { value: this.pressureFbo1.texture },
         dt: { value: Settings.dt },
         pixelSize: { value: Settings.pixelSize },
       },
@@ -123,6 +120,8 @@ class Project {
     // render pressure using Jacobi iterative method
     // start with pressureFbo1
     for (let i = 0; i < Settings.projectIterations; i++) {
+      this.pressureQuad.material.uniforms.pressure.value =
+        this.pressureFbo1.texture;
       // render onto pressureFbo2
       Common.renderer.setRenderTarget(this.pressureFbo2);
       // this currently hold pressureFbo1
@@ -135,11 +134,13 @@ class Project {
       this.pressureFbo1 = temp; // pressureFbo1 is now newly rendered
     }
 
-    // now, pressureFbo2 is always going to be the final result
+    // now, pressureFbo1 is always going to be the final result
   }
 
   renderProject() {
     this.projectQuad.material.uniforms.velocity.value = this.velocFbo.texture;
+    this.projectQuad.material.uniforms.pressure.value =
+      this.pressureFbo1.texture;
 
     // calculate final velocity
     Common.renderer.setRenderTarget(this.tempVelocFbo);

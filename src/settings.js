@@ -7,7 +7,7 @@ class Settings {
     this.dt = dt;
     this.diff = diff;
     this.visc = visc;
-    this.resolution = 4;
+    this.resolution = 1;
     this.cellScale = 1 / this.sideLength;
     this.pixelSize = this.cellScale * this.resolution;
 
