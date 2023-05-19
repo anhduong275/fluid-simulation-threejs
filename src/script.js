@@ -165,11 +165,8 @@ const tick = () => {
   if (notFirstTick) {
     advect.velocFbo = lastOutputtedVelocFbo;
     advect.tempVelocFbo = lastOutputtedTempVelocFbo;
-  } else {
-    // console.log("tick num", notFirstTick);
-    // console.log("advect.velocFbo", advect.velocFbo.texture.id);
-    // console.log("advect.tempVelocFbo", advect.tempVelocFbo.texture.id);
   }
+  advect.render();
 
   // temp
   // TODO: change addStuff's density to veloc
@@ -185,29 +182,27 @@ const tick = () => {
   // adding user interactivity
   if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
     // temp
-    addStuff.densityFbo = advect.velocFbo;
-    addStuff.tempDensityFbo = advect.tempVelocFbo;
+    addStuff.velocityFbo = advect.velocFbo;
+    addStuff.tempVelocityFbo = advect.tempVelocFbo;
 
-    addStuff.addDye(0.4, mouse.mousePos);
-    // const veloc = new Vector2(
-    //   mouse.mousePos.x - mouse.prevMousePos.x,
-    //   mouse.mousePos.y - mouse.prevMousePos.y
-    // );
-    // addStuff.addVelocity(veloc, mouse.mousePos);
-    // console.log("tick num", notFirstTick);
-    // console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
-    // console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
+    // addStuff.addDye(0.1, mouse.mousePos);
+    const veloc = new Vector2(
+      mouse.mousePos.x - mouse.prevMousePos.x,
+      mouse.mousePos.y - mouse.prevMousePos.y
+    );
+    // const veloc = new Vector2(0.2, 0.2);
+    addStuff.addVelocity(veloc, mouse.mousePos);
 
     dyeAdded = true;
   }
 
   // render diffuse & project
   if (dyeAdded) {
-    diffuseVeloc.velocFbo = addStuff.densityFbo;
+    diffuseVeloc.velocFbo = addStuff.velocityFbo;
     diffuseVeloc.render();
     // render project
-    project.velocFbo = addStuff.densityFbo;
-    project.tempVelocFbo = addStuff.tempDensityFbo;
+    project.velocFbo = addStuff.velocityFbo;
+    project.tempVelocFbo = addStuff.tempVelocityFbo;
     project.render();
 
     // reset dyeAdded to false
@@ -220,11 +215,11 @@ const tick = () => {
     project.tempVelocFbo = advect.tempVelocFbo;
     project.render();
   }
-  // diffuseVeloc.velocFbo = addStuff.densityFbo;
+  // diffuseVeloc.velocFbo = addStuff.velocityFbo;
   // diffuseVeloc.render();
   // // render project
-  // project.velocFbo = addStuff.densityFbo;
-  // project.tempVelocFbo = addStuff.tempDensityFbo;
+  // project.velocFbo = addStuff.velocityFbo;
+  // project.tempVelocFbo = addStuff.tempVelocityFbo;
   // project.render();
 
   project.renderVelocity();

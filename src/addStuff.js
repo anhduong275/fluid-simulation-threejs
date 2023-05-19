@@ -5,6 +5,7 @@ import {
   Scene,
   ShaderMaterial,
   Vector2,
+  AdditiveBlending,
 } from "three";
 import fullscreenVert from "./shaders/fullscreenquad.vert";
 import addDyeFrag from "./shaders/addDye.frag";
@@ -43,6 +44,7 @@ class AddStuff {
       },
       vertexShader: fullscreenVert,
       fragmentShader: addDyeFrag,
+      blending: AdditiveBlending,
 
       depthWrite: false,
       depthTest: false,
@@ -62,6 +64,7 @@ class AddStuff {
       },
       vertexShader: fullscreenVert,
       fragmentShader: addVelFrag,
+      blending: AdditiveBlending,
 
       depthWrite: false,
       depthTest: false,

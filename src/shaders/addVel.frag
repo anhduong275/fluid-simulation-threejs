@@ -12,10 +12,20 @@ bool compare(float fragUv, float mouseInput) {
 }
 
 void main() {
-    vec4 oldVel = texture2D(velocity, vUv);
+    // vec4 oldVel = texture2D(velocity, vUv);
+    // if (compare(vUv.x, vUvAdded.x) && compare(vUv.y, vUvAdded.y)) {
+    //     gl_FragColor = vec4(oldVel.xy + velocAdded * dt, 0.0, 1.0);
+    // } else {
+    //     gl_FragColor = oldVel;
+    // }
+    float force = 2.0;
+    vec4 oldVelocity = texture2D(velocity, vUv);
     if (compare(vUv.x, vUvAdded.x) && compare(vUv.y, vUvAdded.y)) {
-        gl_FragColor = vec4(oldVel.xy + velocAdded * dt, 0.0, 1.0);
+        vec2 distanceVec = vUv - vUvAdded;
+        float intensity = max(pixelSize / 2.0 - length(distanceVec), 0.0) / pixelSize * 2.0;
+        vec2 newVelocity =  oldVelocity.xy + velocAdded * intensity * force; // oldVelocity.xy + 
+        gl_FragColor = vec4(newVelocity, 1.0, 1.0);
     } else {
-        gl_FragColor = oldVel;
+        gl_FragColor = vec4(oldVelocity.xy, 1.0, 1.0);
     }
 }

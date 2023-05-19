@@ -6,6 +6,8 @@ class Mouse {
     this.isMouseDown = false;
     this.mousePos = new Vector2(-1, -1);
     this.prevMousePos = new Vector2(-1, -1);
+    this.coords = new Vector2(-1, -1);
+    this.prevCoords = new Vector2(-1, -1);
     document.body.addEventListener("mousedown", () => {
       this.onDocumentMouseDown();
     });
@@ -20,10 +22,12 @@ class Mouse {
   onDocumentMouseDown() {
     console.log("mouse is down");
     this.isMouseDown = true;
+    // this.convertCoords();
   }
   onDocumentMouseUp() {
     this.isMouseDown = false;
     this.mousePos = new Vector2(-1, -1);
+    this.coords = new Vector2(-1, -1);
   }
   onDocumentMouseMove(event) {
     if (this.isMouseDown) {
@@ -68,9 +72,6 @@ class Mouse {
       } else {
         this.prevMousePos = tempMousePos;
       }
-      return this.mousePos;
-    } else {
-      return new Vector2(-1, -1);
     }
   }
 }
