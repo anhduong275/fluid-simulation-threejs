@@ -2,15 +2,12 @@ import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "dat.gui";
-import fullscreenquadVert from "./shaders/fullscreenquad.vert";
-import fullscreenquadFrag from "./shaders/fullscreenquad.frag";
 import Settings from "./settings.js";
 import Common from "./common";
 import Diffuse from "./diffuse";
 import AddStuff from "./addStuff";
 import { Vector2 } from "three";
 import mouse from "./mouse";
-import { convertToNormalizeCoords } from "./utils";
 import Advect from "./advect";
 import Project from "./project";
 
@@ -168,20 +165,8 @@ const tick = () => {
   }
   advect.render();
 
-  // temp
-  // TODO: change addStuff's density to veloc
-  // if (notFirstTick) {
-  //   addStuff.densityFbo = lastOutputtedVelocFbo;
-  //   addStuff.tempDensityFbo = lastOutputtedTempVelocFbo;
-  // } else {
-  //   console.log("tick num", notFirstTick);
-  //   console.log("addStuff.densityFbo", addStuff.densityFbo.texture.id);
-  //   console.log("addStuff.tempDensityFbo", addStuff.tempDensityFbo.texture.id);
-  // }
-
   // adding user interactivity
   if (mouse.isMouseDown && mouse.mousePos.x != -1 && mouse.mousePos.y != -1) {
-    // temp
     addStuff.velocityFbo = advect.velocFbo;
     addStuff.tempVelocityFbo = advect.tempVelocFbo;
 
@@ -190,7 +175,6 @@ const tick = () => {
       mouse.mousePos.x - mouse.prevMousePos.x,
       mouse.mousePos.y - mouse.prevMousePos.y
     );
-    // const veloc = new Vector2(0.2, 0.2);
     addStuff.addVelocity(veloc, mouse.mousePos);
 
     dyeAdded = true;
@@ -199,7 +183,7 @@ const tick = () => {
   // render diffuse & project
   if (dyeAdded) {
     diffuseVeloc.velocFbo = addStuff.velocityFbo;
-    diffuseVeloc.render();
+    // diffuseVeloc.render();
     // render project
     project.velocFbo = addStuff.velocityFbo;
     project.tempVelocFbo = addStuff.tempVelocityFbo;
@@ -209,18 +193,12 @@ const tick = () => {
     dyeAdded = false;
   } else {
     diffuseVeloc.velocFbo = advect.velocFbo;
-    diffuseVeloc.render();
+    // diffuseVeloc.render();
     // render project
     project.velocFbo = advect.velocFbo;
     project.tempVelocFbo = advect.tempVelocFbo;
     project.render();
   }
-  // diffuseVeloc.velocFbo = addStuff.velocityFbo;
-  // diffuseVeloc.render();
-  // // render project
-  // project.velocFbo = addStuff.velocityFbo;
-  // project.tempVelocFbo = addStuff.tempVelocityFbo;
-  // project.render();
 
   project.renderVelocity();
 

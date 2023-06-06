@@ -66,8 +66,11 @@ class Diffuse {
   render() {
     this.diffuseQuad.material.uniforms.velocity.value = this.velocFbo.texture;
     // The linear solver we use is Jacobi iterative solver, following Mofu-dev
+    // console.log("Start---------------------------------------");
     let temp;
     for (let i = 0; i < Settings.diffuseIterations; i++) {
+      // console.log("this.new_velocity ", this.new_velocity.texture.id);
+      // console.log("this.rendertarget ", this.rendertarget.texture.id);
       this.diffuseQuad.material.uniforms.new_velocity.value =
         this.new_velocity.texture;
       // render
@@ -80,9 +83,20 @@ class Diffuse {
       this.new_velocity = this.rendertarget; // new vel is dif 2 now, rendertarget is dif2
       this.rendertarget = temp; // rendertarget is now dif1
     }
+    // console.log("End---------------------------------------");
 
     this.renderQuad.material.uniforms.fboTexture.value =
       this.new_velocity.texture;
+    // console.log(
+    //   "RENDER QUAD this.new_velocity ",
+    //   this.new_velocity.texture.id,
+    //   " ---------------------------------------"
+    // );
+    // console.log(
+    //   "RENDER QUAD this.rendertarget ",
+    //   this.rendertarget.texture.id,
+    //   " ---------------------------------------"
+    // );
     Common.renderer.setRenderTarget(this.velocFbo);
     Common.renderer.render(this.renderScene, this.camera);
     Common.renderer.setRenderTarget(null);

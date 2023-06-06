@@ -60,7 +60,6 @@ class AddStuff {
         velocAdded: { value: new Vector2(0.0, 0.0) },
         vUvAdded: { value: new Vector2(2.0, 2.0) },
         pixelSize: { value: Settings.pixelSize },
-        dt: { value: Settings.dt },
       },
       vertexShader: fullscreenVert,
       fragmentShader: addVelFrag,
