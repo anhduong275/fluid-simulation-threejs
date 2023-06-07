@@ -1,6 +1,5 @@
 import "./style.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "dat.gui";
 import Settings from "./settings.js";
 import Common from "./common";
@@ -88,22 +87,13 @@ camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 2;
 
-// Controls
-// const controls = new OrbitControls(camera, canvas)
-// controls.enableDamping = true
-
 // GUI
 var props = {
   colorOptions: "Black/White/Blue",
 };
 
-// const cameraFolder = gui.addFolder("Camera");
-// cameraFolder.add(camera.position, "x", 0, 10);
-// cameraFolder.add(camera.position, "y", 0, 10);
-// cameraFolder.add(camera.position, "z", 0, 10);
-// cameraFolder.open();
 const colorFolder = gui.addFolder("Color Options");
-colorFolder
+let colors = colorFolder
   .add(props, "colorOptions", [
     "Black/Red/Green",
     "White/Blue/Purple",
@@ -112,27 +102,35 @@ colorFolder
   ])
   .name("Color Options")
   .listen();
-
-/**
- * Animate
- */
-
-const clock = new THREE.Clock();
+colors.onChange((newValue) => {
+  let option = 0;
+  console.log(newValue);
+  switch (newValue) {
+    case "Black/Red/Green":
+      option = 0;
+      break;
+    case "White/Blue/Purple":
+      option = 1;
+      break;
+    case "Black/White/Blue":
+      option = 2;
+      break;
+    case "White/Blue":
+      option = 3;
+      break;
+  }
+  project.changeColorOption(option);
+  mouse.onDocumentMouseUp();
+});
 
 /**
  * Initializing action objects
  */
 
 // addStuff
-// const addStuff = new AddStuff(
-//   fboIds.density,
-//   fboIds.tempDensity,
-//   fboIds.veloc,
-//   fboIds.tempVeloc
-// );
 const addStuff = new AddStuff(
-  fboIds.veloc,
-  fboIds.tempVeloc,
+  fboIds.density,
+  fboIds.tempDensity,
   fboIds.veloc,
   fboIds.tempVeloc
 );
@@ -167,11 +165,7 @@ let lastOutputtedTempVelocFbo;
 let dyeAdded = false;
 
 const tick = () => {
-  // Update Orbital Controls
-  // controls.update()
-
   // Render
-
   // render advect. Not sure why it has to be before addStuff, but it works.
   if (notFirstTick) {
     advect.velocFbo = lastOutputtedVelocFbo;
@@ -196,6 +190,7 @@ const tick = () => {
 
   // render diffuse & project
   if (dyeAdded) {
+    // render diffuse. TEMPORARILY LOCKED
     diffuseVeloc.velocFbo = addStuff.velocityFbo;
     // diffuseVeloc.render();
     // render project
@@ -206,6 +201,7 @@ const tick = () => {
     // reset dyeAdded to false
     dyeAdded = false;
   } else {
+    // render diffuse. TEMPORARILY LOCKED
     diffuseVeloc.velocFbo = advect.velocFbo;
     // diffuseVeloc.render();
     // render project

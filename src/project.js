@@ -95,6 +95,7 @@ class Project {
       uniforms: {
         fboTexture: { value: this.velocFbo.texture },
         pixelSize: { value: Settings.pixelSize },
+        option: { value: 2 },
       },
       vertexShader: fullscreenVert,
       fragmentShader: fullscreenFrag,
@@ -169,6 +170,10 @@ class Project {
   renderVelocity() {
     this.renderQuad.material.uniforms.fboTexture.value = this.velocFbo.texture;
     Common.renderer.render(this.renderScene, this.camera);
+  }
+
+  changeColorOption(colorOption) {
+    this.renderQuad.material.uniforms.option.value = colorOption;
   }
 }
 

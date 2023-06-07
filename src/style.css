@@ -10,6 +10,7 @@ body
     height: 100vh;
     font-family: 'Geologica', sans-serif, 'Poppins';
     /* background-color: rgb(185, 215, 254); */
+    background-image: url('background.png');
 }
 
 h1, h2, p {
