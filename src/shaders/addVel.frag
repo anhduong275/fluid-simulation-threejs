@@ -5,6 +5,7 @@ uniform sampler2D velocity;
 uniform vec2 velocAdded;
 uniform vec2 vUvAdded;
 uniform float pixelSize;
+// uniform vec2 pixelSize2;
 
 float force = 10.0;
 float radiusMultiplier = 100.0;

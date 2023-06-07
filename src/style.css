@@ -8,7 +8,21 @@ html,
 body
 {
     height: 100vh;
-    font-family: 'Poppins';
+    font-family: 'Geologica', sans-serif, 'Poppins';
+    /* background-color: rgb(185, 215, 254); */
+}
+
+h1, h2, p {
+    padding: 0.5em;
+}
+
+.wrap {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    /* background-color: rgb(185, 215, 254); */
 }
 
 .webgl
@@ -23,3 +37,36 @@ body
     /* center the rendering canvas */
     outline: none;
 }
+
+.footer {
+    padding-bottom: 2em;
+}
+
+.backbutton {
+    position: absolute;
+    left: 0;
+    padding-left: 1%;
+    padding-top: 1%;
+}
+
+.trybutton {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trybutton a {
+    background-color: rgb(185, 215, 254);
+    font-size: x-large;
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.backbutton a {
+    background-color: rgb(185, 215, 254);
+    padding: 0.5em;
+    border-radius: 0.5em;
+}
+
+.trybutton a:link, .trybutton a:visited, .backbutton a:link, .backbutton a:visited, .trybutton a:hover, .backbutton a:hover, .trybutton a:active, .backbutton a:active { text-decoration: none; color: black}

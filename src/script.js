@@ -93,11 +93,25 @@ camera.position.z = 2;
 // controls.enableDamping = true
 
 // GUI
-const cameraFolder = gui.addFolder("Camera");
-cameraFolder.add(camera.position, "x", 0, 10);
-cameraFolder.add(camera.position, "y", 0, 10);
-cameraFolder.add(camera.position, "z", 0, 10);
-cameraFolder.open();
+var props = {
+  colorOptions: "Black/White/Blue",
+};
+
+// const cameraFolder = gui.addFolder("Camera");
+// cameraFolder.add(camera.position, "x", 0, 10);
+// cameraFolder.add(camera.position, "y", 0, 10);
+// cameraFolder.add(camera.position, "z", 0, 10);
+// cameraFolder.open();
+const colorFolder = gui.addFolder("Color Options");
+colorFolder
+  .add(props, "colorOptions", [
+    "Black/Red/Green",
+    "White/Blue/Purple",
+    "Black/White/Blue",
+    "White/Blue",
+  ])
+  .name("Color Options")
+  .listen();
 
 /**
  * Animate

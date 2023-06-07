@@ -5,6 +5,7 @@ uniform sampler2D density;
 uniform float amount;
 uniform vec2 vUvAdded;
 uniform float pixelSize;
+// uniform vec2 pixelSize2;
 
 bool compare(float fragUv, float mouseInput) {
     return fragUv >= mouseInput - pixelSize / 2.0 && fragUv <= mouseInput + pixelSize / 2.0;
