@@ -15,3 +15,7 @@ npm run dev
 # Build for production in the dist/ directory
 npm run build
 ```
+
+## Demo video
+https://github.com/anhduong275/fluid-simulation-threejs/assets/84537455/c7d9a8d2-f3ad-45cc-8a77-6260dda8ce97
+
